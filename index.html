@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Для неї 🤍</title>
+
+  <style>
+    :root{
+      --bg1:#070712;
+      --bg2:#0a0a1a;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.10);
+      --stroke: rgba(255,255,255,.14);
+      --txt:#f2f2ff;
+      --muted: rgba(242,242,255,.75);
+      --glow: 0 0 30px rgba(255,255,255,.08);
+      --glow2: 0 0 60px rgba(255,255,255,.10);
+      --radius: 26px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--txt);
+      background: radial-gradient(1200px 600px at 20% 10%, rgba(255,140,200,.18), transparent 60%),
+                  radial-gradient(900px 520px at 80% 20%, rgba(120,180,255,.14), transparent 55%),
+                  radial-gradient(1000px 650px at 50% 90%, rgba(180,120,255,.12), transparent 62%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* Canvas background */
+    #bg{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:-2;
+    }
+    .noise{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:-1;
+      opacity:.08;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    /* Layout */
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px 16px;
+    }
+    .container{
+      width:min(980px, 100%);
+      display:grid;
+      gap:18px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--stroke);
+      box-shadow: var(--glow);
+      backdrop-filter: blur(10px);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:650;
+      letter-spacing:.2px;
+      color:rgba(255,255,255,.92);
+    }
+    .dot{
+      width:10px; height:10px;
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,.25));
+      box-shadow: 0 0 18px rgba(255,180,220,.25);
+    }
+    .mini{
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:18px;
+    }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns:1fr; }
+      .mini{ display:none; }
+    }
+
+    /* Cards */
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      padding:18px;
+      box-shadow: var(--glow2);
+      backdrop-filter: blur(12px);
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-80px -120px auto auto;
+      width:260px;
+      height:260px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,140,210,.25), transparent 65%);
+      filter: blur(14px);
+      transform: rotate(18deg);
+      opacity:.7;
+      pointer-events:none;
+    }
+
+    .title{
+      font-size: clamp(26px, 3.6vw, 42px);
+      line-height: 1.12;
+      margin:0 0 10px 0;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+      max-width:58ch;
+    }
+    .hr{
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      margin:14px 0;
+    }
+
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    /* Buttons */
+    .btn{
+      border:1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+      color:rgba(255,255,255,.92);
+      border-radius: 16px;
+      padding:12px 14px;
+      font-weight:650;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, opacity .18s ease;
+      box-shadow: 0 8px 26px rgba(0,0,0,.25);
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.25);
+      box-shadow: 0 12px 34px rgba(0,0,0,.30), 0 0 34px rgba(255,170,230,.10);
+    }
+    .btn:active{
+      transform: translateY(0px) scale(.98);
+    }
+    .btn.primary{
+      border-color: rgba(255,255,255,.22);
+      background: radial-gradient(circle at 30% 20%, rgba(255,180,240,.18), transparent 55%),
+                  linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.04));
+    }
+    .btn.ghost{
+      background: transparent;
+      box-shadow:none;
+    }
+
+    /* Pills */
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color:var(--muted);
+      font-size:13px;
+    }
+    .heart{
+      filter: drop-shadow(0 0 10px rgba(255,140,220,.22));
+    }
+
+    /* Sections */
+    .sectionTitle{
+      font-size:16px;
+      margin:0 0 10px 0;
+      color:rgba(255,255,255,.92);
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .box{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.15);
+      border-radius: 18px;
+      padding:14px;
+    }
+    .text{
+      margin:0;
+      color:rgba(255,255,255,.90);
+      line-height:1.7;
+      font-size:14px;
+      white-space:pre-line;
+    }
+    .muted{
+      color:var(--muted);
+    }
+
+    /* Typewriter */
+    .type{
+      display:inline-block;
+      border-right:2px solid rgba(255,255,255,.35);
+      padding-right:3px;
+      animation: caret .8s step-end infinite;
+    }
+    @keyframes caret { 50% { border-color: transparent; } }
+
+    /* Right panel */
+    .stack{
+      display:grid;
+      gap:18px;
+    }
+
+    /* Game */
+    .gameWrap{
+      display:grid;
+      gap:10px;
+    }
+    .gameBoard{
+      position:relative;
+      height:260px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.14);
+      background: radial-gradient(300px 160px at 20% 30%, rgba(255,160,220,.12), transparent 60%),
+                  radial-gradient(280px 160px at 85% 70%, rgba(150,190,255,.10), transparent 65%),
+                  rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .heartTarget{
+      position:absolute;
+      font-size:26px;
+      transform: translate(-50%,-50%);
+      cursor:pointer;
+      user-select:none;
+      filter: drop-shadow(0 0 14px rgba(255,170,230,.18));
+      transition: transform .12s ease;
+    }
+    .heartTarget:active{
+      transform: translate(-50%,-50%) scale(.92);
+    }
+
+    .stats{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* Modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      z-index:50;
+    }
+    .modal.on{ display:flex; }
+    .modalCard{
+      width:min(820px, 100%);
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      padding:18px;
+      box-shadow: 0 30px 120px rgba(0,0,0,.45);
+      position:relative;
+      overflow:hidden;
+    }
+    .modalCard::before{
+      content:"";
+      position:absolute;
+      inset:-120px auto auto -120px;
+      width:320px;
+      height:320px;
+      background: radial-gradient(circle at 40% 40%, rgba(255,160,220,.22), transparent 70%);
+      filter: blur(18px);
+      opacity:.85;
+      pointer-events:none;
+    }
+
+    .modalTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .close{
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.04);
+      border-radius:14px;
+      padding:10px 12px;
+      cursor:pointer;
+      color:rgba(255,255,255,.92);
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .close:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.26);
+    }
+
+    /* Tiny floating hint */
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      color:rgba(242,242,255,.65);
+    }
+
+    /* Footer */
+    .footer{
+      text-align:center;
+      color:rgba(242,242,255,.55);
+      font-size:12px;
+      padding:8px 0 0;
+    }
+
+    /* Little sparkle */
+    .spark{
+      display:inline-block;
+      animation: floaty 3.2s ease-in-out infinite;
+    }
+    @keyframes floaty{
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-4px); }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="bg"></canvas>
+  <div class="noise"></div>
+
+  <div class="wrap">
+    <div class="container">
+
+      <div class="topbar">
+        <div class="brand">
+          <span class="dot"></span>
+          <span id="brandText">Лише для неї</span>
+        </div>
+        <div class="mini" id="todayLine">Сьогодні: ...</div>
+      </div>
+
+      <div class="grid">
+
+        <!-- LEFT: Main -->
+        <div class="card">
+          <h1 class="title" id="heroTitle">...</h1>
+          <p class="subtitle" id="heroSub">
+            Я зробив це маленьке диво, щоб ти відчула моє тепло навіть на відстані.
+            Тут буде передбачення, вірш, маленька гра і один міні-мульт — але найголовніше: тут є <b>я</b>.
+          </p>
+
+          <div class="hr"></div>
+
+          <div class="row">
+            <span class="pill"><span class="heart">🤍</span> <span id="nickPill">Крихітко</span></span>
+            <span class="pill"><span class="spark">✨</span> Передбачення</span>
+            <span class="pill"><span class="spark">🎬</span> Міні-мульт</span>
+          </div>
+
+          <div class="row" style="margin-top:14px;">
+            <button class="btn primary" id="btnPrediction">Передбачення на день ✨</button>
+            <button class="btn" id="btnPoem">Вірш для тебе 🤍</button>
+            <button class="btn primary" id="btnMovie">Міні-мульт 🎬</button>
+            <button class="btn ghost" id="btnSecret">Секрет… 🔒</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="box" id="mainBox">
+            <h3 class="sectionTitle" id="boxTitle">Натисни кнопку зверху…</h3>
+            <p class="text muted" id="boxText">
+              Я тут. І я дуже хочу, щоб ти усміхнулась.
+              Обери — і я відкрию для тебе трохи чарівності.
+            </p>
+            <div class="hint" id="hintText">Підказка: “Секрет” відкриється, коли ти пройдеш маленьку гру 😉</div>
+          </div>
+
+          <div class="footer" id="footerLine">З любов’ю. Завжди.</div>
+        </div>
+
+        <!-- RIGHT: Stack -->
+        <div class="stack">
+
+          <!-- Game card -->
+          <div class="card">
+            <h3 class="sectionTitle">Міні-гра: спіймай сердечка 🤍</h3>
+            <p class="subtitle">
+              Це дуже проста гра, <span id="nickInline">Крихітко</span>.
+              Натискай на сердечка — зберемо <b>10</b>, і відкриється фінальний сюрприз.
+            </p>
+
+            <div class="hr"></div>
+
+            <div class="gameWrap">
+              <div class="stats">
+                <div>Зібрано: <b id="score">0</b>/10</div>
+                <div>Час: <b id="time">20</b> сек</div>
+                <div>Стан: <b id="state">готово</b></div>
+              </div>
+
+              <div class="gameBoard" id="board"></div>
+
+              <div class="row">
+                <button class="btn primary" id="btnStart">Почати гру ▶</button>
+                <button class="btn" id="btnStop">Зупинити ⏸</button>
+              </div>
+
+              <p class="hint" id="gameHint">Коли збереш 10 — кнопка “Секрет…” оживе ✨</p>
+            </div>
+          </div>
+
+          <!-- Small “note” card -->
+          <div class="card">
+            <h3 class="sectionTitle">Маленька примітка 🫶</h3>
+            <div class="box">
+              <p class="text" id="noteText">
+                Я не змагаюсь з цілим світом.
+                Я просто хочу бути твоїм <b>спокоєм</b>, твоєю <b>опорою</b> і твоїм <b>теплом</b>.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal (for prediction/poem/secret) -->
+  <div class="modal" id="modal">
+    <div class="modalCard">
+      <div class="modalTop">
+        <div>
+          <h2 style="margin:0 0 6px 0; font-size:22px; letter-spacing:.2px;" id="modalTitle">...</h2>
+          <div style="color:rgba(242,242,255,.72); font-size:13px;" id="modalSub">...</div>
+        </div>
+        <button class="close" id="btnClose">Закрити ✕</button>
+      </div>
+
+      <div class="box">
+        <p class="text" id="modalText"></p>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn primary" id="btnOneMore">Ще раз ✨</button>
+        <button class="btn" id="btnSoft">Заспокой мене 🤍</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Movie Modal -->
+  <div class="modal" id="movieModal">
+    <div class="modalCard" style="padding:14px;">
+      <div class="modalTop">
+        <div>
+          <h2 style="margin:0 0 6px 0; font-size:22px;" id="movieTitle">Міні-мульт ✨</h2>
+          <div style="color:rgba(242,242,255,.72); font-size:13px;">
+            Торкайся сцени — і запускай магію 🤍
+          </div>
+        </div>
+        <button class="close" id="btnMovieClose">Закрити ✕</button>
+      </div>
+
+      <div class="box" style="padding:0; overflow:hidden;">
+        <canvas id="movieCanvas" style="display:block; width:100%; height:360px;"></canvas>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn primary" id="btnMoviePlay">Запустити ▶</button>
+        <button class="btn" id="btnMovieContinue" disabled style="opacity:.55; cursor:not-allowed;">
+          Продовжити 🤍
+        </button>
+      </div>
+
+      <div class="hint" id="movieHint" style="margin-top:8px;">
+        Підказка: зроби 7 торкань по сцені 😉
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /***********************
+     * PERSONALIZATION
+     ***********************/
+    const nicknames = ["Крихітко", "Чарівність", "Ніжність", "Принцеса", "Кошеня"];
+
+    function pickNicknameByDay(){
+      const d = new Date();
+      const key = (d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate());
+      return nicknames[key % nicknames.length];
+    }
+
+    const NICK = pickNicknameByDay();
+
+    const elHeroTitle = document.getElementById("heroTitle");
+    const elNickPill = document.getElementById("nickPill");
+    const elNickInline = document.getElementById("nickInline");
+    const elTodayLine = document.getElementById("todayLine");
+    const elBrandText = document.getElementById("brandText");
+    const elHintText = document.getElementById("hintText");
+
+    elNickPill.textContent = NICK;
+    elNickInline.textContent = NICK;
+    elBrandText.textContent = `Для моєї ${NICK} 🤍`;
+
+    const now = new Date();
+    const dateFmt = new Intl.DateTimeFormat("uk-UA", { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
+    elTodayLine.textContent = `Сьогодні: ${dateFmt.format(now)}`;
+
+    const heroLine = `${NICK}… я зробив це для тебе 🤍`;
+    typeWrite(elHeroTitle, heroLine, 22);
+
+    /***********************
+     * CONTENT
+     ***********************/
+    const predictions = [
+      (n)=> `${n}, сьогодні світ буде м’якшим до тебе — бо ти вмієш світити навіть у тиші.`,
+      (n)=> `${n}, сьогодні твоя усмішка — це знак, що все буде добре. Я поруч.`,
+      (n)=> `${n}, сьогодні ти відчуєш: любов — це не слова, а присутність. І я в ній.`,
+      (n)=> `${n}, сьогодні ти отримаєш маленький привід пишатися собою. Я вже пишаюся.`,
+      (n)=> `${n}, сьогодні твій голос — мій спокій. Навіть якщо він лише в думках.`,
+      (n)=> `${n}, сьогодні буде момент, коли ти згадаєш: ти — моя найніжніша магія.`,
+      (n)=> `${n}, сьогодні я хочу, щоб ти дихала рівно. І відчувала безпеку.`,
+      (n)=> `${n}, сьогодні любов буде на твоєму боці. Бо я обрав тебе.`
+    ];
+
+    const poems = [
+`{N}…
+Ти — тиша, в якій мені тепло.
+Ти — світло, що не засліплює.
+Ти — ніжність, яку хочеться берегти.
+
+Я не прошу в світу нічого зайвого —
+лиш, щоб ти усміхалась частіше.
+І щоб знала:
+в тобі — мій дім.`,
+
+`{N}…
+Якщо день буде важким —
+просто пригорнись подумки до мене.
+Я стану твоїм “все добре”.
+Я стану твоїм “я тут”.
+Я стану твоїм “ти не одна”.
+
+Бо любов — це не гучність.
+Любов — це коли хтось не зникає.`,
+
+`{N}…
+Є люди, що входять у життя —
+і стає світліше.
+Ти — саме така.
+
+Мені хочеться бути твоїм спокоєм,
+твоєю опорою,
+і твоїм теплом,
+яке завжди поруч.`,
+
+`{N}…
+Я дивлюсь на тебе —
+і згадую,
+що ніжність існує.
+
+І якщо десь є справжня магія —
+то вона в тому,
+як ти робиш прості речі красивими.`
+    ];
+
+    const softMessages = [
+      (n)=> `${n}, дихай… один раз. Ще раз. Я поруч. І ти в безпеці 🤍`,
+      (n)=> `${n}, ти не мусиш бути сильною весь час. Я потримаю цей світ за тебе.`,
+      (n)=> `${n}, я люблю твою ніжність. Вона — не слабкість. Вона — твоя сила.`,
+      (n)=> `${n}, якщо втомилась — просто дозволь собі бути. Я тебе обіймаю словами.`
+    ];
+
+    function pickByDate(list){
+      const d = new Date();
+      const seed = (d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate());
+      return list[seed % list.length];
+    }
+
+    const boxTitle = document.getElementById("boxTitle");
+    const boxText  = document.getElementById("boxText");
+
+    /***********************
+     * MODAL (prediction/poem/secret)
+     ***********************/
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalSub = document.getElementById("modalSub");
+    const modalText = document.getElementById("modalText");
+
+    const btnClose = document.getElementById("btnClose");
+    const btnOneMore = document.getElementById("btnOneMore");
+    const btnSoft = document.getElementById("btnSoft");
+
+    let modalMode = "prediction";
+
+    function openModal({title, sub, text, mode}){
+      modalMode = mode || "prediction";
+      modalTitle.textContent = title;
+      modalSub.textContent = sub || "";
+      modalText.textContent = text;
+      modal.classList.add("on");
+    }
+
+    function closeModal(){
+      modal.classList.remove("on");
+    }
+
+    btnClose.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e)=>{ if(e.target === modal) closeModal(); });
+
+    btnOneMore.addEventListener("click", ()=>{
+      if(modalMode === "prediction") showPrediction(true);
+      if(modalMode === "poem") showPoem(true);
+      if(modalMode === "secret") showSecret(true);
+    });
+
+    btnSoft.addEventListener("click", ()=>{
+      const msg = softMessages[Math.floor(Math.random()*softMessages.length)](NICK);
+      openModal({
+        title: `Для тебе, ${NICK} 🤍`,
+        sub: "Трошки тепла, щоб стало легше…",
+        text: msg,
+        mode: modalMode
+      });
+    });
+
+    /***********************
+     * BUTTONS
+     ***********************/
+    document.getElementById("btnPrediction").addEventListener("click", ()=>showPrediction(false));
+    document.getElementById("btnPoem").addEventListener("click", ()=>showPoem(false));
+    document.getElementById("btnSecret").addEventListener("click", ()=>showSecret(false));
+
+    function showPrediction(fromModal){
+      const base = pickByDate(predictions)(NICK);
+      const tails = [
+        "І я дуже хочу, щоб ти сьогодні себе берегла.",
+        "Я вірю в тебе сильніше, ніж ти думаєш.",
+        "Просто пам’ятай: ти для мене — найцінніша.",
+        "Сьогодні я особливо скучив."
+      ];
+      const tail = tails[Math.floor(Math.random()*tails.length)];
+      const text = base + " " + tail;
+
+      boxTitle.textContent = "Передбачення на день ✨";
+      boxText.textContent = text;
+
+      if(!fromModal){
+        openModal({
+          title: `Передбачення для ${NICK} ✨`,
+          sub: "Ніжно. Тепло. Тільки для тебе.",
+          text,
+          mode:"prediction"
+        });
+      }
+    }
+
+    function showPoem(fromModal){
+      const raw = pickByDate(poems);
+      const poem = raw.replaceAll("{N}", NICK);
+
+      boxTitle.textContent = "Вірш для тебе 🤍";
+      boxText.textContent = poem;
+
+      if(!fromModal){
+        openModal({
+          title: `Вірш для ${NICK} 🤍`,
+          sub: "Я хотів, щоб ти відчула це серцем…",
+          text: poem,
+          mode:"poem"
+        });
+      }
+    }
+
+    // Secret locked until game completed
+    let secretUnlocked = false;
+
+    function showSecret(fromModal){
+      if(!secretUnlocked){
+        const t = `Секрет ще трошки закритий, ${NICK} 😉
+Збери 10 сердечок у грі — і я відкрию фінальний лист…`;
+
+        boxTitle.textContent = "Секрет… 🔒";
+        boxText.textContent = t;
+
+        if(!fromModal){
+          openModal({
+            title: `Секрет для ${NICK} 🔒`,
+            sub: "Його можна відкрити дуже просто…",
+            text: t,
+            mode:"secret"
+          });
+        }
+        return;
+      }
+
+      const letter =
+`${NICK}…
+
+Я хочу, щоб ти знала одну просту річ:
+ти для мене — не “випадковість”.
+Ти — вибір.
+
+Я обираю тебе, коли ти усміхаєшся.
+Я обираю тебе, коли тобі важко.
+Я обираю тебе, коли ти мовчиш.
+Я обираю тебе — завжди.
+
+Мені не треба ідеалу.
+Мені треба — твоя реальна ніжність.
+І я буду берегти її.
+
+Якщо ти зараз читаєш це —
+значить я подумки обіймаю тебе.
+Сильно. Тихо. По-справжньому.
+
+Твій… 🤍`;
+
+      boxTitle.textContent = "Фінальний лист 🤍";
+      boxText.textContent = letter;
+
+      if(!fromModal){
+        openModal({
+          title: `Фінал для ${NICK} 🤍`,
+          sub: "Тут є те, що я не завжди встигаю сказати вголос…",
+          text: letter,
+          mode:"secret"
+        });
+      }
+    }
+
+    /***********************
+     * GAME: Catch hearts
+     ***********************/
+    const board = document.getElementById("board");
+    const scoreEl = document.getElementById("score");
+    const timeEl = document.getElementById("time");
+    const stateEl = document.getElementById("state");
+
+    const btnStart = document.getElementById("btnStart");
+    const btnStop = document.getElementById("btnStop");
+
+    let score = 0;
+    let tLeft = 20;
+    let running = false;
+    let spawnTimer = null;
+    let timeTimer = null;
+
+    btnStart.addEventListener("click", startGame);
+    btnStop.addEventListener("click", stopGame);
+
+    function startGame(){
+      if(running) return;
+      running = true;
+      score = 0;
+      tLeft = 20;
+      scoreEl.textContent = score;
+      timeEl.textContent = tLeft;
+      stateEl.textContent = "граємо";
+      board.innerHTML = "";
+
+      spawnTimer = setInterval(spawnHeart, 420);
+      timeTimer = setInterval(()=>{
+        tLeft--;
+        timeEl.textContent = tLeft;
+        if(tLeft <= 0){
+          stopGame();
+          stateEl.textContent = "час вийшов";
+          if(score >= 10){
+            unlockSecret();
+          }
+        }
+      }, 1000);
+    }
+
+    function stopGame(){
+      running = false;
+      clearInterval(spawnTimer);
+      clearInterval(timeTimer);
+      spawnTimer = null;
+      timeTimer = null;
+      stateEl.textContent = "пауза";
+    }
+
+    function spawnHeart(){
+      if(!running) return;
+
+      const heart = document.createElement("div");
+      heart.className = "heartTarget";
+      heart.textContent = Math.random() > 0.5 ? "🤍" : "✨";
+
+      const rect = board.getBoundingClientRect();
+      const x = 10 + Math.random() * (rect.width - 20);
+      const y = 10 + Math.random() * (rect.height - 20);
+
+      heart.style.left = x + "px";
+      heart.style.top  = y + "px";
+
+      const life = 850 + Math.random()*700;
+
+      heart.addEventListener("click", ()=>{
+        if(!running) return;
+        score++;
+        scoreEl.textContent = score;
+        pop(heart);
+
+        if(score >= 10){
+          unlockSecret();
+          stopGame();
+          stateEl.textContent = "успіх";
+          openModal({
+            title: `Молодчинка, ${NICK} ✨`,
+            sub: "Ти зібрала достатньо сердечок…",
+            text: `Секрет тепер відкритий 🤍\nНатисни “Секрет…” на головній картці 😉`,
+            mode:"prediction"
+          });
+        }
+      });
+
+      board.appendChild(heart);
+
+      setTimeout(()=>{
+        if(heart.parentNode) heart.remove();
+      }, life);
+    }
+
+    function pop(el){
+      el.style.transform = "translate(-50%,-50%) scale(1.35)";
+      el.style.opacity = "0";
+      setTimeout(()=>{ if(el.parentNode) el.remove(); }, 120);
+    }
+
+    function unlockSecret(){
+      secretUnlocked = true;
+      document.getElementById("btnSecret").classList.add("primary");
+      elHintText.textContent = `Готово 😌 Тепер “Секрет…” відкритий для тебе, ${NICK} 🤍`;
+      document.getElementById("gameHint").textContent = "Секрет відкритий ✨ Натисни “Секрет…” зліва.";
+    }
+
+    /***********************
+     * TYPEWRITER helper
+     ***********************/
+    function typeWrite(el, text, speed=24){
+      el.innerHTML = "";
+      const span = document.createElement("span");
+      span.className = "type";
+      el.appendChild(span);
+
+      let i = 0;
+      const timer = setInterval(()=>{
+        span.textContent = text.slice(0, i++);
+        if(i > text.length){
+          clearInterval(timer);
+          span.classList.remove("type");
+        }
+      }, speed);
+    }
+
+    /***********************
+     * CANVAS BACKGROUND (particles)
+     ***********************/
+    const canvas = document.getElementById("bg");
+    const ctx = canvas.getContext("2d", { alpha:true });
+
+    let W, H, DPR;
+    const particles = [];
+
+    function resize(){
+      DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      W = canvas.width  = Math.floor(window.innerWidth  * DPR);
+      H = canvas.height = Math.floor(window.innerHeight * DPR);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      particles.length = 0;
+
+      const count = Math.floor((window.innerWidth * window.innerHeight) / 18000);
+      for(let i=0;i<count;i++) particles.push(makeParticle(true));
+    }
+
+    function makeParticle(initial=false){
+      const p = {
+        x: Math.random()*W,
+        y: Math.random()*H,
+        r: (1 + Math.random()*2.2) * DPR,
+        vx: (-.15 + Math.random()*.30) * DPR,
+        vy: (-.10 + Math.random()*.25) * DPR,
+        a: .25 + Math.random()*.55,
+        tw: Math.random()*Math.PI*2
+      };
+      if(initial){
+        p.a *= .85;
+      }
+      return p;
+    }
+
+    function step(){
+      ctx.clearRect(0,0,W,H);
+
+      ctx.save();
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = "rgba(255,255,255,.04)";
+      ctx.fillRect(0,0,W,H);
+      ctx.restore();
+
+      for(const p of particles){
+        p.tw += 0.02;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if(p.x < -10) p.x = W+10;
+        if(p.x > W+10) p.x = -10;
+        if(p.y < -10) p.y = H+10;
+        if(p.y > H+10) p.y = -10;
+
+        const twinkle = (Math.sin(p.tw) + 1) * 0.5;
+        const alpha = p.a * (0.35 + twinkle*0.65);
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.fill();
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+    step();
+
+    /****************************************************
+     * INTERACTIVE MINI MOVIE (Canvas) + FINAL EXPLOSION
+     ****************************************************/
+    const btnMovie = document.getElementById("btnMovie");
+    const movieModal = document.getElementById("movieModal");
+    const btnMovieClose = document.getElementById("btnMovieClose");
+    const btnMoviePlay = document.getElementById("btnMoviePlay");
+    const btnMovieContinue = document.getElementById("btnMovieContinue");
+    const movieHint = document.getElementById("movieHint");
+
+    const movieCanvas = document.getElementById("movieCanvas");
+    const mctx = movieCanvas.getContext("2d", { alpha: true });
+
+    let movieRAF = null;
+    let movieStart = 0;
+    let movieRunning = false;
+
+    // interactive state
+    let taps = 0;
+    let canTap = false;
+    let sparks = []; // particles
+
+    // final explosion state
+    let exploded = false;
+    let explodeAt = 0; // seconds on movie timeline
+
+    function openMovie() {
+      movieModal.classList.add("on");
+      resetMovie();
+      resizeMovie();
+      drawMovie(0);
+    }
+
+    function closeMovie() {
+      movieModal.classList.remove("on");
+      stopMovie();
+    }
+
+    btnMovie?.addEventListener("click", openMovie);
+    btnMovieClose?.addEventListener("click", closeMovie);
+    movieModal?.addEventListener("click", (e) => { if (e.target === movieModal) closeMovie(); });
+
+    btnMoviePlay?.addEventListener("click", () => {
+      if (movieRunning) return;
+      movieRunning = true;
+      movieStart = performance.now();
+      loopMovie();
+    });
+
+    btnMovieContinue?.addEventListener("click", () => {
+      closeMovie();
+      // 🔥 хочеш — одразу показуємо секрет, якщо відкритий
+      // showSecret(false);
+    });
+
+    function resetMovie() {
+      taps = 0;
+      canTap = false;
+      sparks = [];
+      exploded = false;
+      explodeAt = 0;
+      lockContinue();
+      movieHint.textContent = "Підказка: зроби 7 торкань по сцені 😉";
+    }
+
+    function lockContinue() {
+      btnMovieContinue.disabled = true;
+      btnMovieContinue.style.opacity = ".55";
+      btnMovieContinue.style.cursor = "not-allowed";
+    }
+
+    function unlockContinue() {
+      btnMovieContinue.disabled = false;
+      btnMovieContinue.style.opacity = "1";
+      btnMovieContinue.style.cursor = "pointer";
+      movieHint.textContent = `Готово 🤍 Тепер натискай “Продовжити”, ${NICK}…`;
+    }
+
+    function stopMovie() {
+      movieRunning = false;
+      if (movieRAF) cancelAnimationFrame(movieRAF);
+      movieRAF = null;
+    }
+
+    function resizeMovie() {
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      const rect = movieCanvas.getBoundingClientRect();
+      movieCanvas.width = Math.floor(rect.width * dpr);
+      movieCanvas.height = Math.floor(rect.height * dpr);
+      mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener("resize", () => {
+      if (movieModal.classList.contains("on")) resizeMovie();
+    });
+
+    // Interaction (mouse/touch)
+    function pointerPos(e) {
+      const rect = movieCanvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function spawnBurst(x, y, power=1) {
+      const count = Math.floor((18 + Math.random() * 18) * power);
+      const symbols = ["🤍", "✨", "💫", "🫶"];
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = (0.9 + Math.random() * 2.8) * power;
+        sparks.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - (1.4*power),
+          life: 70 + Math.random() * 55,
+          rot: Math.random() * 6.28,
+          vr: (-0.06 + Math.random() * 0.12),
+          s: 14 + Math.random() * 18 * power,
+          a: 0.85 + Math.random() * 0.15,
+          sym: symbols[Math.floor(Math.random() * symbols.length)]
+        });
+      }
+    }
+
+    function onTap(e) {
+      if (!movieModal.classList.contains("on")) return;
+      if (!canTap) return;
+
+      e.preventDefault();
+      const { x, y } = pointerPos(e);
+
+      taps++;
+      spawnBurst(x, y, 1);
+
+      const left = Math.max(0, 7 - taps);
+      if (left > 0) {
+        movieHint.textContent = `Ще ${left} торкань… і буде фінал 🤍`;
+      } else {
+        // Trigger final explosion (one time)
+        if(!exploded){
+          exploded = true;
+          // set explodeAt relative to current time on timeline
+          explodeAt = getMovieT();
+          // BIG center explosion
+          spawnBurst(movieCanvas.clientWidth*0.5, movieCanvas.clientHeight*0.56, 2.2);
+          movieHint.textContent = `Оооох… 💥🤍`;
+          // unlock after short blast
+          setTimeout(()=>unlockContinue(), 550);
+        }
+      }
+    }
+
+    movieCanvas.addEventListener("mousedown", onTap);
+    movieCanvas.addEventListener("touchstart", onTap, { passive: false });
+
+    function getMovieT(){
+      return (performance.now() - movieStart) / 1000;
+    }
+
+    // Movie render loop
+    function loopMovie() {
+      const t = getMovieT();
+      drawMovie(t);
+      if (t < 12.0) {
+        movieRAF = requestAnimationFrame(loopMovie);
+      } else {
+        canTap = true;
+        movieRunning = false;
+      }
+    }
+
+    function easeInOut(x) {
+      return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+    }
+
+    function drawParticles() {
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const p = sparks[i];
+        p.life -= 1;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.038;
+        p.rot += p.vr;
+        p.a *= 0.985;
+
+        if (p.life <= 0 || p.a < 0.05) {
+          sparks.splice(i, 1);
+          continue;
+        }
+
+        mctx.save();
+        mctx.globalAlpha = p.a;
+        mctx.translate(p.x, p.y);
+        mctx.rotate(p.rot);
+        mctx.font = `800 ${p.s}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto`;
+        mctx.textAlign = "center";
+        mctx.textBaseline = "middle";
+        mctx.shadowColor = "rgba(255,170,230,0.30)";
+        mctx.shadowBlur = 18;
+        mctx.fillText(p.sym, 0, 0);
+        mctx.restore();
+      }
+    }
+
+    function drawExplosionOverlay(t, w, h){
+      if(!exploded) return;
+
+      const dt = Math.max(0, t - explodeAt);
+      if(dt > 1.6) return;
+
+      const p = Math.min(1, dt / 1.6);
+      const k = easeInOut(p);
+
+      // Screen pulse overlay
+      mctx.save();
+      mctx.globalAlpha = 0.10 * (1 - k);
+      mctx.fillStyle = "rgba(255,170,230,1)";
+      mctx.fillRect(0,0,w,h);
+      mctx.restore();
+
+      // Expanding rings
+      const cx = w*0.5;
+      const cy = h*0.56;
+
+      for(let i=0;i<3;i++){
+        const ringP = Math.min(1, (dt - i*0.07) / 1.1);
+        if(ringP <= 0) continue;
+
+        const rr = (40 + ringP*260) * (1 + i*0.06);
+        mctx.save();
+        mctx.globalAlpha = (0.18 - i*0.045) * (1 - ringP);
+        mctx.strokeStyle = "rgba(255,255,255,1)";
+        mctx.lineWidth = 2;
+        mctx.beginPath();
+        mctx.arc(cx, cy, rr, 0, Math.PI*2);
+        mctx.stroke();
+        mctx.restore();
+      }
+
+      // Big center heart flash
+      mctx.save();
+      mctx.globalAlpha = 0.95 * (1 - k*0.85);
+      mctx.font = `900 ${Math.floor(52 + k*26)}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto`;
+      mctx.textAlign = "center";
+      mctx.textBaseline = "middle";
+      mctx.shadowColor = "rgba(255,170,230,0.45)";
+      mctx.shadowBlur = 28;
+      mctx.fillStyle = "rgba(255,255,255,0.95)";
+      mctx.fillText("🤍", cx, cy);
+      mctx.restore();
+
+      // Text reveal: "Я кохаю тебе..."
+      if(dt > 0.35){
+        const tp = Math.min(1, (dt - 0.35) / 0.9);
+        const ta = easeInOut(tp);
+
+        mctx.save();
+        mctx.globalAlpha = 0.05 + ta*0.95;
+        mctx.fillStyle = "rgba(255,255,255,0.96)";
+        mctx.font = "900 22px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+        mctx.textAlign = "center";
+        mctx.fillText(`Я кохаю тебе, ${NICK}…`, w*0.5, h*0.18);
+
+        mctx.globalAlpha = 0.55 * ta;
+        mctx.fillStyle = "rgba(242,242,255,0.90)";
+        mctx.font = "700 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+        mctx.fillText("Натисни “Продовжити”…", w*0.5, h*0.24);
+        mctx.restore();
+      }
+    }
+
+    function drawMovie(t) {
+      const w = movieCanvas.clientWidth;
+      const h = movieCanvas.clientHeight;
+
+      // Background soft gradient
+      mctx.clearRect(0, 0, w, h);
+      const g = mctx.createRadialGradient(w * 0.3, h * 0.3, 20, w * 0.5, h * 0.5, Math.max(w, h));
+      g.addColorStop(0, "rgba(255,170,230,0.18)");
+      g.addColorStop(0.5, "rgba(150,190,255,0.10)");
+      g.addColorStop(1, "rgba(0,0,0,0.35)");
+      mctx.fillStyle = g;
+      mctx.fillRect(0, 0, w, h);
+
+      // Stars (simple twinkle)
+      for (let i = 0; i < 70; i++) {
+        const sx = (i * 97) % w;
+        const sy = (i * 53) % h;
+        const tw = (Math.sin(t * 1.6 + i) + 1) * 0.5;
+        mctx.fillStyle = `rgba(255,255,255,${0.12 + tw * 0.36})`;
+        mctx.fillRect(sx, sy, 1.5, 1.5);
+      }
+
+      // Shooting star (0.5s - 3.2s)
+      if (t > 0.5 && t < 3.2) {
+        const p = easeInOut((t - 0.5) / 2.7);
+        const x = w * (0.85 - p * 0.65);
+        const y = h * (0.18 + p * 0.35);
+
+        mctx.strokeStyle = "rgba(255,255,255,0.35)";
+        mctx.lineWidth = 2;
+        mctx.beginPath();
+        mctx.moveTo(x, y);
+        mctx.lineTo(x + 90, y - 34);
+        mctx.stroke();
+
+        mctx.fillStyle = "rgba(255,255,255,0.95)";
+        mctx.beginPath();
+        mctx.arc(x, y, 3.2, 0, Math.PI * 2);
+        mctx.fill();
+      }
+
+      // Heart draw (2s - 7s)
+      if (t > 2.0) {
+        const p = Math.min(1, (t - 2.0) / 5.0);
+        const k = easeInOut(p);
+
+        const cx = w * 0.5;
+        const cy = h * 0.56;
+        const s = Math.min(w, h) * 0.22;
+
+        mctx.save();
+        mctx.translate(cx, cy);
+
+        mctx.strokeStyle = `rgba(255,255,255,${0.20 + k * 0.65})`;
+        mctx.lineWidth = 3;
+        mctx.lineCap = "round";
+        mctx.lineJoin = "round";
+
+        const steps = Math.floor(280 * k);
+        mctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const a = (i / 280) * Math.PI * 2;
+          const x = 16 * Math.pow(Math.sin(a), 3);
+          const y = -(13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a));
+          const px = (x / 18) * s;
+          const py = (y / 18) * s;
+          if (i === 0) mctx.moveTo(px, py);
+          else mctx.lineTo(px, py);
+        }
+        mctx.shadowColor = "rgba(255,170,230,0.25)";
+        mctx.shadowBlur = 24;
+        mctx.stroke();
+
+        if (p > 0.86) {
+          const fp = (p - 0.86) / 0.14;
+          mctx.fillStyle = `rgba(255,170,230,${0.05 + fp * 0.13})`;
+          mctx.fill();
+        }
+
+        mctx.restore();
+      }
+
+      // Text reveal + enable tapping after 6.5s
+      if (t > 6.5 && !exploded) {
+        const p = Math.min(1, (t - 6.5) / 2.2);
+        const a = easeInOut(p);
+
+        mctx.globalAlpha = 0.05 + a * 0.95;
+        mctx.fillStyle = "rgba(255,255,255,0.92)";
+        mctx.font = "800 22px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+        mctx.textAlign = "center";
+        mctx.fillText(`${NICK}… це для тебе 🤍`, w * 0.5, h * 0.18);
+
+        mctx.globalAlpha = 0.55 * a;
+        mctx.font = "700 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+        mctx.fillStyle = "rgba(242,242,255,0.88)";
+        mctx.fillText("Торкнись сцени — і відчуй магію…", w * 0.5, h * 0.24);
+
+        mctx.globalAlpha = 1;
+
+        if (a > 0.45) canTap = true;
+
+        if (taps === 0 && a > 0.92) {
+          spawnBurst(w * 0.5, h * 0.62, 1.2);
+        }
+      }
+
+      // Particles on top
+      drawParticles();
+
+      // Final explosion overlay
+      drawExplosionOverlay(t, w, h);
+
+      // If unlocked, draw “ready” badge
+      if (!btnMovieContinue.disabled) {
+        mctx.save();
+        mctx.globalAlpha = 0.95;
+        mctx.fillStyle = "rgba(0,0,0,0.35)";
+        mctx.strokeStyle = "rgba(255,255,255,0.18)";
+        mctx.lineWidth = 1;
+
+        const bw = 260;
+        const bh = 38;
+        const bx = w * 0.5 - bw / 2;
+        const by = h * 0.82;
+
+        roundRect(mctx, bx, by, bw, bh, 14);
+        mctx.fill();
+        mctx.stroke();
+
+        mctx.fillStyle = "rgba(255,255,255,0.92)";
+        mctx.font = "700 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+        mctx.textAlign = "center";
+        mctx.textBaseline = "middle";
+        mctx.fillText("Готово 🤍 Натисни “Продовжити”", w * 0.5, by + bh / 2);
+        mctx.restore();
+      }
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.arcTo(x + w, y, x + w, y + h, rr);
+      ctx.arcTo(x + w, y + h, x, y + h, rr);
+      ctx.arcTo(x, y + h, x, y, rr);
+      ctx.arcTo(x, y, x + w, y, rr);
+      ctx.closePath();
+    }
+  </script>
+</body>
+</html>
